@@ -4,9 +4,14 @@ class Game {
     this.wordElement = container.querySelector('.word');
     this.winsElement = container.querySelector('.status__wins');
     this.lossElement = container.querySelector('.status__loss');
+    this.counter = document.querySelector('#counter');
+
+    this.interval = null; 
+    this.wordCount = 0;
+    this.successCount = 0;
+    this.sec = 0;
 
     this.reset();
-
     this.registerEvents();
   }
 
@@ -17,13 +22,21 @@ class Game {
   }
 
   registerEvents() {
-    /*
-      TODO:
-      Написать обработчик события, который откликается
-      на каждый введённый символ.
-      В случае правильного ввода слова вызываем this.success()
-      При неправильном вводе символа - this.fail();
-     */
+    document.addEventListener('keydown', this.receiveSymbolEventHandler.bind(this));
+  }
+
+  receiveSymbolEventHandler(event) {
+    event.preventDefault();
+    let currentSymbol = this.currentSymbol.textContent.toLowerCase().trim();
+    let symbol = event.key.toLowerCase().trim();
+    
+    if(currentSymbol === symbol) {
+      this.successCount += 1;
+      this.success();
+    }
+    else {
+      this.fail();
+    }
   }
 
   success() {
@@ -50,8 +63,13 @@ class Game {
 
   setNewWord() {
     const word = this.getWord();
-
     this.renderWord(word);
+
+    this.successCount = 0;
+    clearInterval(this.interval);
+    this.wordCount = word.length + 1;
+    this.sec = this.wordCount;
+    this.interval = setInterval(this.inverseCounter.bind(this, this.updateCounter), 1000); 
   }
 
   getWord() {
@@ -81,8 +99,27 @@ class Game {
       )
       .join('');
     this.wordElement.innerHTML = html;
+    this.currentSymbol = this.wordElement.querySelector('.symbol_current');   
+  }
 
-    this.currentSymbol = this.wordElement.querySelector('.symbol_current');
+  updateCounter(count) {
+    let strNumber = count < 10 ? ('0' + count) : count;
+    strNumber = `00:00:${strNumber}`;
+    this.counter.textContent = strNumber;
+  }
+
+  inverseCounter(func) {
+    if(this.sec <= 0) {
+      if(this.successCount === this.wordCount) {
+        this.success();
+      }
+      else {
+        this.fail();
+      }
+      return;
+    } 
+    this.sec  = this.sec  - 1; 
+    func.call(this, this.sec );   
   }
 }
 
