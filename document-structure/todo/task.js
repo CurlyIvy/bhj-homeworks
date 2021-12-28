@@ -3,8 +3,14 @@ window.addEventListener('load', function() {
     form.addEventListener('submit', function(evt) {
         evt.preventDefault();
 
-        let text = document.getElementById('task__input');
-        let task = taskFactory(text.value);
+        let textElement = document.getElementById('task__input');
+        let text = textElement.value.trim();
+        if (text === '') {
+            console.log('Пустая задача');
+            return;
+        }
+        textElement.value = '';
+        let task = taskFactory(text);        
 
         let list = document.getElementById('tasks__list');
         list.appendChild(task);

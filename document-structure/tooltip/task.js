@@ -14,7 +14,10 @@ window.addEventListener('load', function() {
         tiltoop.parent = evt.target;
         tiltoop.activate();
         tiltoop.setPosition();
-        evt.target.appendChild(tiltoop.element);
+
+        let parent = evt.target.parentNode;
+        let nextSibling = evt.target.nextSibling;       
+        parent?.insertBefore(tiltoop.element, nextSibling);
     }));
 });
 

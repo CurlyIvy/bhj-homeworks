@@ -36,15 +36,23 @@ class Product {
     decreaseCount(evt) {
         evt.preventDefault();
 
-        let count = this.quantityValue.innerText;
-        this.quantityValue.innerText = Number(count) - 1;
+        let countText = this.quantityValue.innerText;
+        let count = Number(countText) - 1;
+        if(count <= 0) {
+            return;
+        }
+        this.quantityValue.innerText = count;
     }
 
     increaseCount(evt) {
         evt.preventDefault();
     
-        let count = this.quantityValue.innerText;
-        this.quantityValue.innerText = Number(count) + 1;
+        let countText = this.quantityValue.innerText;
+        let count = Number(countText) + 1;
+        if(count <= 0) {            
+            return;
+        }
+        this.quantityValue.innerText = count;
     }
 
     createProductToCart(evt) {
@@ -52,6 +60,10 @@ class Product {
 
         let imgClone = this.img.cloneNode(false);
         let count = this.quantityValue.innerText;
+        if(count <= 0) {
+            console.log('Количество не может быть меньше или равно нулю');
+            return;
+        }
         let productToCart = this.factory(this.id, imgClone, count);
         this.cart.addProduct(productToCart);
     }
@@ -128,6 +140,7 @@ function productFactory(id, cloneImg, count) {
     product.classList.add('cart__product');
     product.dataset.id = id;
 
+    cloneImg.className = 'cart__product-image';
     product.appendChild(cloneImg);
 
     let countControl = document.createElement('div');
