@@ -37,11 +37,17 @@
   box-shadow: none;
 }
 
-.welcome {
+.message {
   display: none;
 }
 
-.welcome_active {
+.message_active {
+  display: block;
+  text-align: center;
+}
+
+.message_error {
+  color: red;
   display: block;
   text-align: center;
 }
