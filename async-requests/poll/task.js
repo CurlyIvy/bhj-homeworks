@@ -9,32 +9,53 @@ let pollPostRequestData = {
 
 window.addEventListener('load', function() {
     const pollControl = new PollControl();
-    const xhr = new XMLHttpRequest();
-    xhr.addEventListener('readystatechange', function() {
-        if(xhr.readyState === xhr.DONE && xhr.status === 200) {
-            let response = JSON.parse(xhr.responseText);
-            let id = response.id;
-            let data = response.data;
-            pollControl.setItems(id, data.title, data.answers, sendData);
-        }
+    const requestWrapper = new RequestWrapper()
+
+    requestWrapper.send(pollGetRequestData, null, null, function(response) {
+        let id = response.id;
+        let data = response.data;
+        pollControl.setItems(id, data.title, data.answers, sendData);
     });
-    xhr.open(pollGetRequestData.Type, pollGetRequestData.Url);
-    xhr.send();
 
     function sendData(id, index) {
-        const xhr = new XMLHttpRequest;
-        xhr.addEventListener('readystatechange', function() {
-            if(xhr.readyState === xhr.DONE && xhr.status === 200) {
-                let response = JSON.parse(xhr.responseText); 
-                let data = response.stat;
-                pollControl.saveResult(data);
-            }
+        let headers = [ 
+            { key: 'Content-type', value: 'application/x-www-form-urlencoded' } 
+        ];
+        let data = `vote=${id}&answer=${index}`;
+        requestWrapper.send(pollPostRequestData, headers, data, function(response) {
+            let data = response.stat;
+            pollControl.saveResult(data);
         });
-        xhr.open(pollPostRequestData.Type, pollPostRequestData.Url);
-        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-        xhr.send(`vote=${id}&answer=${index}`);
     }
 });
+
+class RequestWrapper {
+    constructor() {
+        this._xhr = new XMLHttpRequest();
+    }
+
+    send(connectionOption, headers, data, callback) {
+        this._xhr.open(connectionOption.Type, connectionOption.Url);
+        headers?.forEach(item => {
+            this._xhr.setRequestHeader(item.key, item.value);
+        });
+        this._xhr.onload = this.invokeCallback.bind(this, callback);
+        if(data !== null) {
+            this._xhr.send(data);
+        }
+        else {
+            this._xhr.send();
+        }
+    }
+
+    invokeCallback(callback) {
+        if (this._xhr.status !== 200) {
+            return;
+        }
+        let response = JSON.parse(this._xhr.responseText); 
+        callback(response);
+    }
+}
 
 class PollControl {
     constructor() {
